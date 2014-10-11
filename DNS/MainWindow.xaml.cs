@@ -29,23 +29,23 @@ namespace DNSwitchy
             UpdateAdapters();
         }
 
-        public void UpdateAdapters(){
-            foreach (var nic in app.dns.Adapters)
-            {
-                ComboBoxItem cbi = new ComboBoxItem();
-                cbi.Content = nic.Name;
-                cbi.DataContext = nic;
-                adapter.Items.Add(cbi);
-            }
+        public void UpdateAdapters()
+        {
+            adapter.ItemsSource = app.dns.Adapters;
         }
 
         private void adapter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            dns.Text = "";
-            foreach (var server in app.dns.GetDNS((adapter.SelectedItem as ComboBoxItem).DataContext as NetworkInterface))
+            dns.Text = " ";
+            foreach (var server in app.dns.GetDNS((adapter.SelectedItem as NetworkInterface)))
             {
-                dns.Text += server;
+                dns.Text += server + " ";
             }
+        }
+        private void Save_Click(object sender, RoutedEventArgs e)
+        {
+            string message = app.dns.SetSecondaryDNS(adapter.SelectedItem as NetworkInterface, dns.Text);
+            MessageBox.Show(message);
         }
     }
 }

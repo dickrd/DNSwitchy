@@ -8,12 +8,11 @@
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0">
-            <ComboBox Margin="10" Name="adapter" SelectionChanged="adapter_SelectionChanged"/>
+            <ComboBox Margin="10" Name="adapter" DisplayMemberPath="Name" SelectionChanged="adapter_SelectionChanged"/>
             <TextBox Margin="10" Name="dns"/>
         </StackPanel>
         <WrapPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Margin="10" Padding="5" Content="Save" HorizontalAlignment="Right"/>
-            <Button Margin="10" Padding="5" Content="Quit" HorizontalAlignment="Right"/>
+            <Button Margin="10" Padding="5" Content="Save" Click="Save_Click" HorizontalAlignment="Right"/>
         </WrapPanel>
 
     </Grid>

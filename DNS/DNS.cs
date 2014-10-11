@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Management;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
 
 namespace DNSwitchy
 {
@@ -16,23 +17,20 @@ namespace DNSwitchy
 		{
 			Adapters = GetAdapters();
 		}
-		public void SetDNS(string[] dnsServers)
+		public string SetPrimaryDNS(NetworkInterface adapter, string dnsServer)
 		{
-			using (var networkConfigMng = new ManagementClass("Win32_NetworkAdapterConfiguration"))
-			{
-				using (var networkConfigs = networkConfigMng.GetInstances())
-				{
-					foreach (var managementObject in networkConfigs.Cast<ManagementObject>().Where(objMO => (bool)objMO["IPEnabled"]))
-					{
-						using (var newDNS = managementObject.GetMethodParameters("SetDNSServerSearchOrder"))
-						{
-							newDNS["DNSServerSearchOrder"] = dnsServers;
-							//managementObject.InvokeMethod("SetDNSServerSearchOrder", newDNS, null);
-						}
-					}
-				}
-			}
+            string arguments, output;
+            arguments = string.Format("interface ip set dns name=\"{0}\" static {1}", adapter.Name, dnsServer);
+            output = RunCommand("netsh.exe", arguments);
+            return output;
 		}
+        public string SetSecondaryDNS(NetworkInterface adapter, string dnsServer)
+        {
+            string arguments, output;
+            arguments = string.Format("interface ip add dns name=\"{0}\" {1} index=2", adapter.Name, dnsServer);
+            output = RunCommand("netsh.exe", arguments);
+            return output;
+        }
 		public string[] GetDNS(NetworkInterface adapter)
 		{
 			List<string> dnsServerList = new List<string>();
@@ -49,5 +47,20 @@ namespace DNSwitchy
 			NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
 			return adapters;
 		}
+        private string RunCommand(string filename, string arguments)
+        {
+            Process process = new Process();
+            string output;
+            process.StartInfo.FileName = filename;
+            process.StartInfo.Arguments = arguments;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+
+            process.Start();
+            output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return output;
+        }
 	}
 }
