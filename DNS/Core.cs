@@ -49,21 +49,41 @@ namespace DNSwitchy
 		private NetworkInterface[] getAdapters()
 		{
 			NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-			return adapters;
+            List<NetworkInterface> adapterList = new List<NetworkInterface>();
+            foreach (var adapter in adapters)
+            {
+                if (check(adapter))
+                {
+                    adapterList.Add(adapter);
+                }
+            }
+			return adapterList.ToArray();
 		}
         private DnsServer[] getDnsServers()
         {
             List<DnsServer> dnsServerList = new List<DnsServer>();
             dnsServerList.Add(new DnsServer() { 
-                Name = "Google",
+                Name = "Google DNS",
                 PrimaryAddress = "8.8.8.8",
                 SecondaryAddress = "8.8.4.4"
             });
             dnsServerList.Add(new DnsServer()
             {
-                Name = "Ali",
-                PrimaryAddress = "223.8.8.8",
-                SecondaryAddress = "223.8.4.4"
+                Name = "Ali DNS",
+                PrimaryAddress = "223.5.5.5",
+                SecondaryAddress = "223.6.6.6"
+            });
+            dnsServerList.Add(new DnsServer()
+            {
+                Name = "114 DNS",
+                PrimaryAddress = "114.114.114.114",
+                SecondaryAddress = "114.114.115.115"
+            });
+            dnsServerList.Add(new DnsServer()
+            {
+                Name = "Open DNS",
+                PrimaryAddress = "208.67.222.222",
+                SecondaryAddress = "208.67.220.220"
             });
             return dnsServerList.ToArray();
         }
@@ -81,6 +101,19 @@ namespace DNSwitchy
             output = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
             return output;
+        }
+        private bool check(NetworkInterface adapter)
+        {
+            NetworkInterfaceType networkInterfaceType = adapter.NetworkInterfaceType;
+            bool typeChecked = (networkInterfaceType != NetworkInterfaceType.Loopback && networkInterfaceType != NetworkInterfaceType.Tunnel);
+            if (typeChecked)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 	}
 }

@@ -27,6 +27,7 @@ namespace DNSwitchy
             app = Application.Current as App;
             InitializeComponent();
             UpdateData();
+            adapterList.SelectedIndex = 0;
         }
 
         public void UpdateData()
@@ -42,9 +43,17 @@ namespace DNSwitchy
 
         private string save()
         {
-            string message;
-            message = app.CurrentMachine.SetPrimaryDns(adapterList.SelectedItem as NetworkInterface, currentPrimaryDns.Text);
-            message += app.CurrentMachine.SetSecondaryDns(adapterList.SelectedItem as NetworkInterface, currentSecondaryDns.Text);
+            string message, primaryOutput, secondaryOutput;
+            primaryOutput = app.CurrentMachine.SetPrimaryDns(adapterList.SelectedItem as NetworkInterface, currentPrimaryDns.Text);
+            secondaryOutput = app.CurrentMachine.SetSecondaryDns(adapterList.SelectedItem as NetworkInterface, currentSecondaryDns.Text);
+            if (primaryOutput == "\r\n" && secondaryOutput == "\r\n")
+            {
+                message = "Succeed!";
+            }
+            else
+            {
+                message = "Failed!";
+            }
             return message;
         }
     }
