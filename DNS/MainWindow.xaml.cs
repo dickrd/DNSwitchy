@@ -26,26 +26,26 @@ namespace DNSwitchy
         {
             app = Application.Current as App;
             InitializeComponent();
-            UpdateAdapters();
+            UpdateData();
         }
 
-        public void UpdateAdapters()
+        public void UpdateData()
         {
-            adapter.ItemsSource = app.dns.Adapters;
+            adapterList.ItemsSource = app.CurrentMachine.Adapters;
+            dnsServerList.ItemsSource = app.CurrentMachine.DnsServers;
         }
 
-        private void adapter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            dns.Text = " ";
-            foreach (var server in app.dns.GetDNS((adapter.SelectedItem as NetworkInterface)))
-            {
-                dns.Text += server + " ";
-            }
-        }
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            string message = app.dns.SetSecondaryDNS(adapter.SelectedItem as NetworkInterface, dns.Text);
-            MessageBox.Show(message);
+            MessageBox.Show(save());
+        }
+
+        private string save()
+        {
+            string message;
+            message = app.CurrentMachine.SetPrimaryDns(adapterList.SelectedItem as NetworkInterface, currentPrimaryDns.Text);
+            message += app.CurrentMachine.SetSecondaryDns(adapterList.SelectedItem as NetworkInterface, currentSecondaryDns.Text);
+            return message;
         }
     }
 }

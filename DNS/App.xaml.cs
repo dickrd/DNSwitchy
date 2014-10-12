@@ -13,10 +13,10 @@ namespace DNSwitchy
     /// </summary>
     public partial class App : Application
     {
-        public DNS dns { get; set; }
+        public Core CurrentMachine { get; set; }
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            dns = new DNS();
+            CurrentMachine = new Core();
         }
     }
 }

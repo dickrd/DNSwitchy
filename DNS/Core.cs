@@ -9,29 +9,32 @@ using System.Diagnostics;
 
 namespace DNSwitchy
 {
-	public class DNS
+	public class Core
 	{
 		public NetworkInterface[] Adapters { get; set; }
+        public DnsServer[] DnsServers { get; set; }
 
-		public DNS()
+		public Core()
 		{
-			Adapters = GetAdapters();
+			Adapters = getAdapters();
+            DnsServers = getDnsServers();
 		}
-		public string SetPrimaryDNS(NetworkInterface adapter, string dnsServer)
+
+		public string SetPrimaryDns(NetworkInterface adapter, string dnsServer)
 		{
             string arguments, output;
-            arguments = string.Format("interface ip set dns name=\"{0}\" static {1}", adapter.Name, dnsServer);
-            output = RunCommand("netsh.exe", arguments);
+            arguments = string.Format("interface ip set dns name=\"{0}\" static {1} validate=no", adapter.Name, dnsServer);
+            output = runCommand("netsh.exe", arguments);
             return output;
 		}
-        public string SetSecondaryDNS(NetworkInterface adapter, string dnsServer)
+        public string SetSecondaryDns(NetworkInterface adapter, string dnsServer)
         {
             string arguments, output;
-            arguments = string.Format("interface ip add dns name=\"{0}\" {1} index=2", adapter.Name, dnsServer);
-            output = RunCommand("netsh.exe", arguments);
+            arguments = string.Format("interface ip add dns name=\"{0}\" {1} index=2 validate=no", adapter.Name, dnsServer);
+            output = runCommand("netsh.exe", arguments);
             return output;
         }
-		public string[] GetDNS(NetworkInterface adapter)
+		public string[] GetDns(NetworkInterface adapter)
 		{
 			List<string> dnsServerList = new List<string>();
 			IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
@@ -42,12 +45,29 @@ namespace DNSwitchy
 			}
 			return dnsServerList.ToArray();
 		}
-		public NetworkInterface[] GetAdapters()
+
+		private NetworkInterface[] getAdapters()
 		{
 			NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
 			return adapters;
 		}
-        private string RunCommand(string filename, string arguments)
+        private DnsServer[] getDnsServers()
+        {
+            List<DnsServer> dnsServerList = new List<DnsServer>();
+            dnsServerList.Add(new DnsServer() { 
+                Name = "Google",
+                PrimaryAddress = "8.8.8.8",
+                SecondaryAddress = "8.8.4.4"
+            });
+            dnsServerList.Add(new DnsServer()
+            {
+                Name = "Ali",
+                PrimaryAddress = "223.8.8.8",
+                SecondaryAddress = "223.8.4.4"
+            });
+            return dnsServerList.ToArray();
+        }
+        private string runCommand(string filename, string arguments)
         {
             Process process = new Process();
             string output;
