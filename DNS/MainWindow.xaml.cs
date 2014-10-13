@@ -40,6 +40,39 @@ namespace DNSwitchy
         {
             MessageBox.Show(save());
         }
+        private void dnsServerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if ((dnsServerList.SelectedItem as DnsServer).Name == "Current")
+            {
+                currentPrimaryDns.IsReadOnly = false;
+                currentSecondaryDns.IsReadOnly = false;
+            }
+            else
+            {
+                currentPrimaryDns.IsReadOnly = true;
+                currentSecondaryDns.IsReadOnly = true;
+            }
+        }
+        private void adapterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DnsServer current = app.CurrentMachine.DnsServers.Find(x => x.Name == "Current");
+            List<string> currentDns = app.CurrentMachine.GetDns(adapterList.SelectedItem as NetworkInterface);
+            if (currentDns.Count >= 2)
+            {
+                current.PrimaryAddress = currentDns[0];
+                current.SecondaryAddress = currentDns[1];
+            }
+            else if (currentDns.Count == 1)
+            {
+                current.PrimaryAddress = currentDns[0];
+                current.SecondaryAddress = "";
+            }
+            else
+            {
+                current.PrimaryAddress = "";
+                current.SecondaryAddress = "";
+            }
+        }
 
         private string save()
         {
@@ -52,7 +85,7 @@ namespace DNSwitchy
             }
             else
             {
-                message = "Failed!";
+                message = primaryOutput == "\r\n" ? secondaryOutput : primaryOutput;
             }
             return message;
         }
