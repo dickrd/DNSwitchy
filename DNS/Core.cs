@@ -53,10 +53,7 @@ namespace DNSwitchy
             {
                 if (check(adapter))
                 {
-                    if (adapter.OperationalStatus == OperationalStatus.Up)
-                        adapterList.Insert(0, adapter);
-                    else
-                        adapterList.Add(adapter);
+                    adapterList.Add(adapter);
                 }
             }
 			return adapterList;
@@ -78,9 +75,9 @@ namespace DNSwitchy
         }
         private bool check(NetworkInterface adapter)
         {
-            NetworkInterfaceType networkInterfaceType = adapter.NetworkInterfaceType;
-            bool typeChecked = (networkInterfaceType != NetworkInterfaceType.Loopback && networkInterfaceType != NetworkInterfaceType.Tunnel);
-            if (typeChecked)
+            bool typeChecked = (adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback && adapter.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
+            bool up = adapter.OperationalStatus == OperationalStatus.Up;
+            if (typeChecked && up)
             {
                 return true;
             }
