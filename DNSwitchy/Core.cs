@@ -1,31 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace DNSwitchy
 {
-	public class Core
-	{
+    public class Core
+    {
         public List<NetworkInterface> Adapters { get; set; }
         public List<DnsServer> DnsServers { get; set; }
 
-		public Core()
-		{
-			Adapters = getAdapters();
-		}
+        public Core()
+        {
+            Adapters = getAdapters();
+        }
 
-		public string SetPrimaryDns(NetworkInterface adapter, string dnsServer)
-		{
+        public string SetPrimaryDns(NetworkInterface adapter, string dnsServer)
+        {
             string arguments, output;
             arguments = string.Format("interface ip set dns name=\"{0}\" static {1} validate=no", adapter.Name, dnsServer);
             output = runCommand("netsh.exe", arguments);
             return output;
-		}
+        }
         public string SetSecondaryDns(NetworkInterface adapter, string dnsServer)
         {
             string arguments, output;
@@ -34,20 +29,20 @@ namespace DNSwitchy
             return output;
         }
         public List<string> GetDns(NetworkInterface adapter)
-		{
-			List<string> dnsServerList = new List<string>();
-			IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
-			IPAddressCollection dnsServers = adapterProperties.DnsAddresses;
-			foreach (var dnsServer in dnsServers)
-		    {
-				dnsServerList.Add(dnsServer.ToString());
-			}
-			return dnsServerList;
-		}
+        {
+            List<string> dnsServerList = new List<string>();
+            IPInterfaceProperties adapterProperties = adapter.GetIPProperties();
+            IPAddressCollection dnsServers = adapterProperties.DnsAddresses;
+            foreach (var dnsServer in dnsServers)
+            {
+                dnsServerList.Add(dnsServer.ToString());
+            }
+            return dnsServerList;
+        }
 
         private List<NetworkInterface> getAdapters()
-		{
-			NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+        {
+            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
             List<NetworkInterface> adapterList = new List<NetworkInterface>();
             foreach (var adapter in adapters)
             {
@@ -56,8 +51,8 @@ namespace DNSwitchy
                     adapterList.Add(adapter);
                 }
             }
-			return adapterList;
-		}
+            return adapterList;
+        }
         private string runCommand(string filename, string arguments)
         {
             Process process = new Process();
@@ -86,5 +81,5 @@ namespace DNSwitchy
                 return false;
             }
         }
-	}
+    }
 }

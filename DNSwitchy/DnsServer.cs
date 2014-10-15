@@ -1,17 +1,12 @@
-﻿using System;
-using System.Net.NetworkInformation;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.NetworkInformation;
 
 namespace DNSwitchy
 {
     public class DnsServer
     {
         private static string path = "DnsServer";
-        public static string Path 
-        { 
+        public static string Path
+        {
             get
             {
                 return path;
@@ -36,8 +31,8 @@ namespace DNSwitchy
         public string Name { get; set; }
         public string PrimaryAddress { get; set; }
         public string SecondaryAddress { get; set; }
-        public string PingValue 
-        { 
+        public string PingValue
+        {
             get
             {
                 return pingTest(this);

@@ -1,11 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace DNSwitchy
@@ -27,7 +22,8 @@ namespace DNSwitchy
             List<DnsServer> dnsServerList = new List<DnsServer>();
             foreach (var dnsServer in File.ReadLines(DnsServer.Path))
             {
-                dnsServerList.Add(new DnsServer() {
+                dnsServerList.Add(new DnsServer()
+                {
                     Name = dnsServer.Split(',')[0],
                     PrimaryAddress = dnsServer.Split(',')[1],
                     SecondaryAddress = dnsServer.Split(',')[2]
