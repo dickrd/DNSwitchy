@@ -1,17 +1,73 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
+using System.IO;
+using System.Net.Http;
 
 namespace DNSwitchy
 {
     public class Core
     {
-        public List<NetworkInterface> Adapters { get; set; }
-        public List<DnsServer> DnsServers { get; set; }
-
-        public Core()
+        public IEnumerable<NetworkInterface> Adapters
         {
-            Adapters = getAdapters();
+            get
+            {
+                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var adapter in adapters)
+                {
+                    if (validate(adapter))
+                    {
+                        yield return adapter;
+                    }
+                }
+            }
+        }
+        private List<DnsServer> dnsServers = null;
+        public List<DnsServer> DnsServers
+        {
+            get
+            {
+                if (dnsServers != null)
+                {
+                    return dnsServers;
+                }
+                checkUpdate();
+                dnsServers = new List<DnsServer>();
+                foreach (var dnsServer in File.ReadLines(DnsServer.Path))
+                {
+                    dnsServers.Add(new DnsServer()
+                    {
+                        Name = dnsServer.Split(',')[0],
+                        PrimaryAddress = dnsServer.Split(',')[1],
+                        SecondaryAddress = dnsServer.Split(',')[2]
+                    });
+                }
+                return dnsServers;
+            }
+        }
+        private double currentVersion = -1;
+        public double CurrentVersion
+        {
+            get
+            {
+                if (currentVersion < 0 && !File.Exists(DnsServer.Path))
+                {
+                    currentVersion = 0;
+                }
+                else
+                {
+                    using (var line = File.ReadLines(DnsServer.Path).GetEnumerator())
+                    {
+                        line.MoveNext();
+                        currentVersion = double.Parse(line.Current.Split(',')[1]);
+                    }
+                }
+                return currentVersion;
+            }
+            private set
+            {
+                currentVersion = value;
+            }
         }
 
         public string SetPrimaryDns(NetworkInterface adapter, string dnsServer)
@@ -40,19 +96,6 @@ namespace DNSwitchy
             return dnsServerList;
         }
 
-        private List<NetworkInterface> getAdapters()
-        {
-            NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-            List<NetworkInterface> adapterList = new List<NetworkInterface>();
-            foreach (var adapter in adapters)
-            {
-                if (check(adapter))
-                {
-                    adapterList.Add(adapter);
-                }
-            }
-            return adapterList;
-        }
         private string runCommand(string filename, string arguments)
         {
             Process process = new Process();
@@ -68,7 +111,7 @@ namespace DNSwitchy
             process.WaitForExit();
             return output;
         }
-        private bool check(NetworkInterface adapter)
+        private bool validate(NetworkInterface adapter)
         {
             bool typeChecked = (adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback && adapter.NetworkInterfaceType != NetworkInterfaceType.Tunnel);
             bool up = adapter.OperationalStatus == OperationalStatus.Up;
@@ -79,6 +122,21 @@ namespace DNSwitchy
             else
             {
                 return false;
+            }
+        }
+        private void checkUpdate()
+        {
+            double version;
+            using (var httpClient = new HttpClient())
+            using (var response = httpClient.GetStringAsync(DnsServer.Url))
+            {
+                version = double.Parse(response.Result.Split('\n')[0].Split(',')[1]);
+                if (File.Exists(DnsServer.Path) && version <= CurrentVersion)
+                {
+                    return;
+                }
+                File.WriteAllText(DnsServer.Path, response.Result);
+                CurrentVersion = version;
             }
         }
     }
