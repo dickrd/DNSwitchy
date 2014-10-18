@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Linq;
 
 namespace DNSwitchy
 {
@@ -28,7 +29,10 @@ namespace DNSwitchy
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(save());
+            (sender as Button).Content = "Saving...";
+            string message = save();
+            (sender as Button).Content = "Save";
+            MessageBox.Show(message);
         }
         private void dnsServerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -45,7 +49,7 @@ namespace DNSwitchy
         }
         private void adapterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            DnsServer current = app.CurrentMachine.DnsServers.Find(x => x.Name == "Current");
+            DnsServer current = dnsServerList.Items.Cast<DnsServer>().Where(x => x.Name == "Current").First();
             List<string> currentDns = app.CurrentMachine.GetDns(adapterList.SelectedItem as NetworkInterface);
             if (currentDns.Count >= 2)
             {

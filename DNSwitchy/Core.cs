@@ -22,27 +22,20 @@ namespace DNSwitchy
                 }
             }
         }
-        private List<DnsServer> dnsServers = null;
-        public List<DnsServer> DnsServers
+        public IEnumerable<DnsServer> DnsServers
         {
             get
             {
-                if (dnsServers != null)
-                {
-                    return dnsServers;
-                }
                 checkUpdate();
-                dnsServers = new List<DnsServer>();
                 foreach (var dnsServer in File.ReadLines(DnsServer.Path))
                 {
-                    dnsServers.Add(new DnsServer()
+                    yield return new DnsServer()
                     {
                         Name = dnsServer.Split(',')[0],
                         PrimaryAddress = dnsServer.Split(',')[1],
                         SecondaryAddress = dnsServer.Split(',')[2]
-                    });
+                    };
                 }
-                return dnsServers;
             }
         }
         private double currentVersion = -1;
@@ -131,7 +124,7 @@ namespace DNSwitchy
             using (var response = httpClient.GetStringAsync(DnsServer.Url))
             {
                 version = double.Parse(response.Result.Split('\n')[0].Split(',')[1]);
-                if (File.Exists(DnsServer.Path) && version <= CurrentVersion)
+                if (version <= CurrentVersion)
                 {
                     return;
                 }
