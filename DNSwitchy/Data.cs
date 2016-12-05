@@ -32,6 +32,23 @@ namespace DNSwitchy
             using (var profile = File.OpenRead(Profile.PATH))
             {
                 _profiles = new DataContractJsonSerializer(typeof(List<Profile>)).ReadObject(profile) as List<Profile>;
+                foreach (var item in _profiles)
+                {
+                    if (string.IsNullOrWhiteSpace(item.Mask))
+                    {
+                        item.Mask = "255.255.255.0";
+                    }
+                    if (!item.StaticAddress)
+                    {
+                        item.Address = "DHCP";
+                        item.Gateway = "DHCP";
+                        item.Mask = "";
+                    }
+                    if (!item.StaticDns) 
+                    {
+                        item.DnsServer = "DHCP";
+                    }
+                }
             }
         }
 

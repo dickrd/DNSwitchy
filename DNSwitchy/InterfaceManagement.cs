@@ -19,7 +19,7 @@ namespace DNSwitchy
             return interfaceArray;
         }
 
-        public static string SetStaticAddress(NetworkInterface theInterface, string address, string gateway, string mask = "255.255.255.0")
+        public static string SetStaticAddress(NetworkInterface theInterface, string address, string gateway, string mask)
         {
             string arguments, output;
             arguments = string.Format("interface ip set address {0} static {1} {2} {3}", theInterface.Name, address, mask, gateway);
@@ -53,17 +53,22 @@ namespace DNSwitchy
 
         private static string runCommand(string filename, string arguments)
         {
-            Process process = new Process();
-            string output;
-            process.StartInfo.FileName = filename;
-            process.StartInfo.Arguments = arguments;
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
+            string output = "\r\n";
+            using (Process process = new Process())
+            {
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = filename,
+                    Arguments = arguments,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
 
-            process.Start();
-            output = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
+                process.Start();
+                output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+            }
             return output;
         }
     }
