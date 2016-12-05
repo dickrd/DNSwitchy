@@ -23,16 +23,35 @@ namespace DNSwitchy
 
         public void UpdateData()
         {
-            app.data.Load();
+            try
+            {
+                app.data.Load();
+            }
+            catch (System.Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+                app.Shutdown(-1);
+            }
+
             interfaceList.ItemsSource = app.data.Interfaces;
             profileList.ItemsSource = app.data.Profiles;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            string message;
+
             (sender as Button).IsEnabled = false;
-            string message = apply();
+            try
+            {
+                message = apply();
+            }
+            catch (System.Exception exception)
+            {
+                message = exception.Message;
+            }
             (sender as Button).IsEnabled = true;
+
             MessageBox.Show(message);
         }
 
