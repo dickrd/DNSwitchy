@@ -18,7 +18,6 @@ namespace DNSwitchy
             app = Application.Current as App;
             InitializeComponent();
             UpdateData();
-            interfaceList.SelectedIndex = 0;
         }
 
         public void UpdateData()
@@ -26,15 +25,18 @@ namespace DNSwitchy
             try
             {
                 app.data.Load();
+
+                interfaceList.ItemsSource = app.data.Interfaces;
+                profileList.ItemsSource = app.data.Profiles;
+
+                interfaceList.SelectedIndex = 0;
+                profileList.SelectedIndex = 0;
             }
             catch (System.Exception exception)
             {
                 MessageBox.Show(exception.Message);
                 app.Shutdown(-1);
             }
-
-            interfaceList.ItemsSource = app.data.Interfaces;
-            profileList.ItemsSource = app.data.Profiles;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
