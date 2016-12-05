@@ -15,8 +15,22 @@
 }, {
   "StaticAddress": true,
   "StaticDns": true,
+  "Address": "192.168.1.22",
+  "Mask": "255.255.255.0",
+  "Gateway": "192.168.1.110",
+  "DnsServer": "192.168.1.110"
+}, {
+  "StaticAddress": true,
+  "StaticDns": true,
+  "Address": "192.168.1.23",
+  "Mask": "255.255.255.0",
+  "Gateway": "192.168.1.110",
+  "DnsServer": "192.168.1.110"
+}, {
+  "StaticAddress": true,
+  "StaticDns": true,
   "Address": "192.168.1.24",
   "Mask": "255.255.255.0",
   "Gateway": "192.168.1.1",
-  "DnsServer": "119.19.19.19"
+  "DnsServer": "119.29.29.29"
 }]
