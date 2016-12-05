@@ -18,69 +18,69 @@ namespace DNSwitchy
             app = Application.Current as App;
             InitializeComponent();
             UpdateData();
-            adapterList.SelectedIndex = 0;
+            interfaceList.SelectedIndex = 0;
         }
 
         public void UpdateData()
         {
-            adapterList.ItemsSource = app.CurrentMachine.Adapters;
-            dnsServerList.ItemsSource = app.CurrentMachine.DnsServers;
+            app.data.Load();
+            interfaceList.ItemsSource = app.data.Interfaces;
+            profileList.ItemsSource = app.data.Profiles;
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            (sender as Button).Content = "Saving...";
-            string message = save();
-            (sender as Button).Content = "Save";
+            (sender as Button).IsEnabled = false;
+            string message = apply();
+            (sender as Button).IsEnabled = true;
             MessageBox.Show(message);
         }
-        private void dnsServerList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if ((dnsServerList.SelectedItem as DnsServer).Name == "Current")
-            {
-                currentPrimaryDns.IsReadOnly = false;
-                currentSecondaryDns.IsReadOnly = false;
-            }
-            else
-            {
-                currentPrimaryDns.IsReadOnly = true;
-                currentSecondaryDns.IsReadOnly = true;
-            }
-        }
-        private void adapterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            DnsServer current = dnsServerList.Items.Cast<DnsServer>().Where(x => x.Name == "Current").First();
-            List<string> currentDns = app.CurrentMachine.GetDns(adapterList.SelectedItem as NetworkInterface);
-            if (currentDns.Count >= 2)
-            {
-                current.PrimaryAddress = currentDns[0];
-                current.SecondaryAddress = currentDns[1];
-            }
-            else if (currentDns.Count == 1)
-            {
-                current.PrimaryAddress = currentDns[0];
-                current.SecondaryAddress = "";
-            }
-            else
-            {
-                current.PrimaryAddress = "";
-                current.SecondaryAddress = "";
-            }
-        }
 
-        private string save()
+        private string apply()
         {
-            string message, primaryOutput, secondaryOutput;
-            primaryOutput = app.CurrentMachine.SetPrimaryDns(adapterList.SelectedItem as NetworkInterface, currentPrimaryDns.Text);
-            secondaryOutput = app.CurrentMachine.SetSecondaryDns(adapterList.SelectedItem as NetworkInterface, currentSecondaryDns.Text);
-            if (primaryOutput == "\r\n" && secondaryOutput == "\r\n")
+            string message = "Succeed!", output = "\r\n";
+
+            var currentProfile = profileList.SelectedItem as Data.Profile;
+            var currentInterface = interfaceList.SelectedItem as NetworkInterface;
+
+            if (currentProfile.StaticDns)
             {
-                message = "Succeed!";
+                output = InterfaceManagement.SetStaticDns(currentInterface, currentProfile.DnsServer);
+                if (output != "\r\n")
+                {
+                    message = output;
+                    return message;
+                }
             }
             else
             {
-                message = primaryOutput == "\r\n" ? secondaryOutput : primaryOutput;
+                output = InterfaceManagement.SetDhcpDns(currentInterface);
+                if (output != "\r\n")
+                {
+                    message = output;
+                    return message;
+                }
             }
+
+            if (currentProfile.StaticAddress)
+            {
+                output = InterfaceManagement.SetStaticAddress(currentInterface, currentProfile.Address, currentProfile.Gateway, currentProfile.Mask);
+                if (output != "\r\n")
+                {
+                    message = output;
+                    return message;
+                }
+            }
+            else
+            {
+                output = InterfaceManagement.SetDhcpAddress(currentInterface);
+                if (output != "\r\n")
+                {
+                    message = output;
+                    return message;
+                }
+            }
+
             return message;
         }
     }

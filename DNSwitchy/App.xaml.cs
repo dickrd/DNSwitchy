@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Windows;
 
 namespace DNSwitchy
@@ -10,10 +9,10 @@ namespace DNSwitchy
     /// </summary>
     public partial class App : Application
     {
-        public Core CurrentMachine { get; set; }
+        public Data data { get; set; }
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            CurrentMachine = new Core();
+            data = new Data();
         }
     }
 }
